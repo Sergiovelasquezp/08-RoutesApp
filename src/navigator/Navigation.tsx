@@ -1,11 +1,16 @@
 import {createStackNavigator} from '@react-navigation/stack';
-import React from 'react';
+import React, {useContext} from 'react';
+import {PermissionContext} from '../context/PermissionsContext';
+import {LoadingScreen} from '../pages/LoadingScreen';
 import {MapScreen} from '../pages/MapScreen';
 import {PrivilegesScreen} from '../pages/PrivilegesScreen';
 
 const Stack = createStackNavigator();
 export const Navigation = () => {
-  return (
+  const {permissions} = useContext(PermissionContext);
+  return permissions.locationStatue === 'unavailable' ? (
+    <LoadingScreen />
+  ) : (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
@@ -13,8 +18,11 @@ export const Navigation = () => {
           backgroundColor: 'white',
         },
       }}>
-      <Stack.Screen name="PrivilegesScreen" component={PrivilegesScreen} />
-      <Stack.Screen name="MapScreen" component={MapScreen} />
+      {permissions.locationStatue === 'granted' ? (
+        <Stack.Screen name="MapScreen" component={MapScreen} />
+      ) : (
+        <Stack.Screen name="PrivilegesScreen" component={PrivilegesScreen} />
+      )}
     </Stack.Navigator>
   );
 };
