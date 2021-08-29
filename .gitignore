@@ -57,3 +57,9 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+# env Files
+.env
+
+# lock files
+*.lock

@@ -7,7 +7,6 @@ import {
   PermissionStatus,
   request,
 } from 'react-native-permissions';
-
 export interface PermissionsState {
   locationStatue: PermissionStatus;
 }
