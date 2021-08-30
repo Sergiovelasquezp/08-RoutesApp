@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {StyleSheet} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {useLocation} from '../hooks/useLocation';
@@ -6,14 +6,43 @@ import {LoadingScreen} from '../pages/LoadingScreen';
 import {Fab} from './Fab';
 
 export const Map = () => {
-  const {hasLocation, initialPosition, getCurrentLocation} = useLocation();
+  const {
+    hasLocation,
+    initialPosition,
+    getCurrentLocation,
+    followUserLocation,
+    stopFollowingUser,
+    userLocation,
+  } = useLocation();
   const mapViewRef = useRef<MapView>();
+  const following = useRef<boolean>(true);
+
+  useEffect(() => {
+    followUserLocation();
+    return () => {
+      stopFollowingUser();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!following.current) {
+      return;
+    }
+    mapViewRef.current?.animateCamera({
+      center: {
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+      },
+    });
+    return () => {};
+  }, [userLocation]);
+
   if (!hasLocation) {
     return <LoadingScreen />;
   }
 
   const centerUserPosition = async () => {
-    console.log(mapViewRef.current);
+    following.current = true;
     const location = await getCurrentLocation();
     const {latitude, longitude} = location;
     mapViewRef.current?.animateCamera({
@@ -34,6 +63,7 @@ export const Map = () => {
         ref={el => (mapViewRef.current = el!)}
         style={{...styles.map}}
         showsUserLocation={true}
+        onTouchStart={() => (following.current = false)}
         initialRegion={{
           latitude: initialPosition.latitude,
           longitude: initialPosition.longitude,
